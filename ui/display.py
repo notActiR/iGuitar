@@ -3,54 +3,66 @@ UI显示模块
 职责：在画面上绘制手部骨架和信息
 """
 import cv2
-import mediapipe as mp
+import numpy as np
 
 
 class Display:
     def __init__(self):
-        self.mp_drawing = mp.solutions.drawing_utils
-        self.mp_hands = mp.solutions.hands
+        # 手部连接关系（21个关键点的连接）
+        self.HAND_CONNECTIONS = [
+            (0, 1), (1, 2), (2, 3), (3, 4),  # 大拇指
+            (0, 5), (5, 6), (6, 7), (7, 8),  # 食指
+            (0, 9), (9, 10), (10, 11), (11, 12),  # 中指
+            (0, 13), (13, 14), (14, 15), (15, 16),  # 无名指
+            (0, 17), (17, 18), (18, 19), (19, 20),  # 小指
+            (5, 9), (9, 13), (13, 17)  # 手掌连接
+        ]
 
-        # 自定义骨架样式
-        self.drawing_spec = self.mp_drawing.DrawingSpec(
-            color=(0, 255, 0),  # 绿色
-            thickness=2,
-            circle_radius=3
-        )
-
-        self.connection_spec = self.mp_drawing.DrawingSpec(
-            color=(255, 0, 0),  # 红色
-            thickness=2
-        )
+        # 颜色配置
+        self.landmark_color = (0, 255, 0)  # 绿色关键点
+        self.connection_color = (255, 0, 0)  # 红色连接线
+        self.text_color = (255, 255, 0)  # 黄色文字
 
     def draw_landmarks(self, frame, results):
         """
-        在画面上绘制手部骨架
+        在画面上绘制手部骨架（新版API）
         :param frame: BGR图像
         :param results: MediaPipe检测结果
         :return: 绘制后的图像
         """
-        if results.multi_hand_landmarks:
-            for hand_idx, hand_landmarks in enumerate(results.multi_hand_landmarks):
-                # 绘制关键点和连接线
-                self.mp_drawing.draw_landmarks(
-                    frame,
-                    hand_landmarks,
-                    self.mp_hands.HAND_CONNECTIONS,
-                    self.drawing_spec,
-                    self.connection_spec
-                )
+        if not results.hand_landmarks:
+            return frame
 
-                # 显示左右手标签
-                handedness = results.multi_handedness[hand_idx].classification[0].label
-                h, w, _ = frame.shape
+        h, w, _ = frame.shape
 
-                # 在手腕位置显示标签
-                wrist = hand_landmarks.landmark[0]
-                cx, cy = int(wrist.x * w), int(wrist.y * h)
+        for idx, hand_landmarks in enumerate(results.hand_landmarks):
+            # 转换关键点为像素坐标
+            points = []
+            for lm in hand_landmarks:
+                cx, cy = int(lm.x * w), int(lm.y * h)
+                points.append((cx, cy))
 
-                cv2.putText(frame, handedness, (cx - 30, cy - 20),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
+            # 绘制连接线
+            for connection in self.HAND_CONNECTIONS:
+                start_idx, end_idx = connection
+                start_point = points[start_idx]
+                end_point = points[end_idx]
+                cv2.line(frame, start_point, end_point,
+                        self.connection_color, 2)
+
+            # 绘制关键点
+            for point in points:
+                cv2.circle(frame, point, 5, self.landmark_color, -1)
+                cv2.circle(frame, point, 5, (255, 255, 255), 1)  # 白色边框
+
+            # 显示左右手标签
+            handedness = results.handedness[idx][0].category_name
+            wrist = points[0]  # 手腕位置
+
+            cv2.putText(frame, handedness,
+                       (wrist[0] - 30, wrist[1] - 20),
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.7,
+                       self.text_color, 2)
 
         return frame
 
@@ -61,17 +73,27 @@ class Display:
         :param fps: 帧率
         :param hand_count: 检测到的手数
         """
+        # 半透明背景
+        overlay = frame.copy()
+        cv2.rectangle(overlay, (5, 5), (250, 100), (0, 0, 0), -1)
+        cv2.addWeighted(overlay, 0.3, frame, 0.7, 0, frame)
+
         # 显示FPS
         cv2.putText(frame, f'FPS: {int(fps)}', (10, 30),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+                   cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
 
         # 显示手数
+        color = (0, 255, 0) if hand_count > 0 else (0, 0, 255)
         cv2.putText(frame, f'Hands: {hand_count}', (10, 60),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+                   cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
+
+        # 显示API版本
+        cv2.putText(frame, 'MediaPipe Tasks API', (10, 90),
+                   cv2.FONT_HERSHEY_SIMPLEX, 0.5, (200, 200, 200), 1)
 
         # 显示退出提示
         cv2.putText(frame, 'Press Q to quit', (10, frame.shape[0] - 20),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+                   cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
 
         return frame
 
