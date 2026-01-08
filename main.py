@@ -60,7 +60,7 @@ def main():
             # 2. 预处理
             rgb_frame, bgr_frame = preprocessor.process(frame)
 
-            # 3. 手部检测（新版API）
+            # 3. 手部检测
             results = hand_tracker.detect(rgb_frame)
 
             # 4. 提取关键点（用于后续分析）

@@ -14,7 +14,7 @@ class HandTracker:
                  detection_confidence=0.5,
                  tracking_confidence=0.5):
         """
-        初始化手部追踪器（新版API）
+        初始化手部追踪器
         :param model_path: 模型文件路径
         :param max_hands: 最大检测手数
         :param detection_confidence: 检测置信度

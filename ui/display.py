@@ -25,7 +25,7 @@ class Display:
 
     def draw_landmarks(self, frame, results):
         """
-        在画面上绘制手部骨架（新版API）
+        在画面上绘制手部骨架
         :param frame: BGR图像
         :param results: MediaPipe检测结果
         :return: 绘制后的图像
