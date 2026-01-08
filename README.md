@@ -333,11 +333,10 @@ preprocessor = VideoPreprocessor(
 
 ## 👨‍💻 作者
 
-**你的名字**
+**Li Zeyu**
 
-- 大学/学院：XX大学
-- 年级专业：大二 计算机科学
-- 联系方式：your.email@example.com
+- 大学/学院：北京邮电大学/国际学院
+- 联系方式：lzydavid123@gmail.com
 
 ---
 
