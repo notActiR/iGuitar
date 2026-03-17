@@ -1,0 +1,14 @@
+{
+    "title": "Twinkle Twinkle (Chords)",
+    "tempo": 120,
+    "time_signature": "4/4",
+    "chords": [
+        { "chord": "C", "duration": 4 },
+        { "chord": "C", "duration": 4 },
+        { "chord": "G", "duration": 4 },
+        { "chord": "G", "duration": 4 },
+        { "chord": "Am", "duration": 4 },
+        { "chord": "Am", "duration": 4 },
+        { "chord": "G", "duration": 8 }
+    ]
+}
