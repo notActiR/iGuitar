@@ -112,4 +112,4 @@ def create_ui():
 
 if __name__ == "__main__":
     demo = create_ui()
-    demo.launch(server_name="127.0.0.1", server_port=6667)
+    demo.launch(share=False, inbrowser=True)
