@@ -1,0 +1,26 @@
+{
+  "camera": {
+    "id": 0,
+    "width": 1280,
+    "height": 720
+  },
+  "hand_tracker": {
+    "max_hands": 2,
+    "detection_confidence": 0.5,
+    "tracking_confidence": 0.5,
+    "model_path": "assets/models/hand_landmarker.task"
+  },
+  "preprocessor": {
+    "flip": true,
+    "target_width": 1280
+  },
+  "display": {
+    "show_fps": true,
+    "show_hand_count": true,
+    "landmark_color": [0, 255, 0],
+    "connection_color": [255, 0, 0]
+  },
+  "calibration": {
+    "matrix_path": "calibration_matrix.npy"
+  }
+}
