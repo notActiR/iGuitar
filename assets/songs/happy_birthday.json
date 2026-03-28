@@ -1,0 +1,21 @@
+{
+    "title": "Happy Birthday (Chords)",
+    "tempo": 100,
+    "time_signature": "3/4",
+    "chords": [
+        { "chord": "G", "duration": 4 },
+        { "chord": "G", "duration": 4 },
+        { "chord": "C", "duration": 4 },
+        { "chord": "G", "duration": 4 },
+        { "chord": "C", "duration": 4 },
+        { "chord": "G", "duration": 4 },
+        { "chord": "D", "duration": 8 },
+        { "chord": "G", "duration": 4 },
+        { "chord": "G", "duration": 4 },
+        { "chord": "C", "duration": 4 },
+        { "chord": "G", "duration": 4 },
+        { "chord": "D", "duration": 4 },
+        { "chord": "C", "duration": 4 },
+        { "chord": "G", "duration": 8 }
+    ]
+}

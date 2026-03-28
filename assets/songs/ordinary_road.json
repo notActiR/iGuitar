@@ -1,0 +1,19 @@
+{
+    "title": "Ordinary Road (Chords)",
+    "tempo": 80,
+    "time_signature": "4/4",
+    "chords": [
+        { "chord": "Em", "duration": 4 },
+        { "chord": "C", "duration": 4 },
+        { "chord": "G", "duration": 4 },
+        { "chord": "D", "duration": 4 },
+        { "chord": "Em", "duration": 4 },
+        { "chord": "C", "duration": 4 },
+        { "chord": "G", "duration": 4 },
+        { "chord": "D", "duration": 4 },
+        { "chord": "Am", "duration": 4 },
+        { "chord": "C", "duration": 4 },
+        { "chord": "G", "duration": 4 },
+        { "chord": "D", "duration": 4 }
+    ]
+}

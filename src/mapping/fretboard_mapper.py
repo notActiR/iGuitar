@@ -20,6 +20,14 @@ class FretboardMapper:
         fret, string = transformed[0, 0, 0], transformed[0, 0, 1]
         return fret, string
 
+    def fretboard_to_pixel(self, fret, string):
+        """将指板坐标 (fret, string) 映射回图像像素坐标 (x, y)"""
+        p_fretboard = np.array([[fret, string]], dtype=np.float32).reshape(-1, 1, 2)
+        H_inv = np.linalg.inv(self.homography)
+        p_pixel_homog = cv2.perspectiveTransform(p_fretboard, H_inv)
+        x, y = p_pixel_homog[0, 0, 0], p_pixel_homog[0, 0, 1]
+        return int(x), int(y)
+
     def get_finger_frets(self, hand_landmarks, image_shape):
         h, w = image_shape[:2]
         result = {}
