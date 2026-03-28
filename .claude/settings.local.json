@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp camera/camera.py src/core/)",
+      "Bash(cp vision/hand_tracker.py src/core/)",
+      "Bash(cp vision/preprocess.py src/core/preprocessor.py)",
+      "Bash(mv models/* assets/models/)",
+      "Bash(mv songs/* assets/songs/)"
+    ]
+  }
+}

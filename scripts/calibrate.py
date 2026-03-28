@@ -1,12 +1,18 @@
 """
 标定脚本：运行此脚本，按屏幕提示用食指依次点按四个点，生成标定矩阵
 """
+import sys
+import os
 import cv2
-from camera.camera import Camera
-from vision.hand_tracker import HandTracker
-from vision.preprocess import VideoPreprocessor
-from ui.display import Display
-from calibration.calibrator import Calibrator
+
+# 获取项目根目录
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, PROJECT_ROOT)
+os.chdir(PROJECT_ROOT)
+
+from src.core import Camera, HandTracker, VideoPreprocessor
+from src.ui.display import Display
+from src.mapping import Calibrator
 
 def main():
     # 初始化模块
