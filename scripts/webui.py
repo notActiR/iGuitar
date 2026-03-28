@@ -46,38 +46,36 @@ class iGuitarWebUI:
         except Exception as e:
             return f"❌ 加载失败: {e}"
 
-    def video_stream(self):
-        while True:
-            if not self.camera:
-                time.sleep(0.1)
-                continue
+    def get_frame(self):
+        if not self.camera:
+            return None
 
-            ret, frame = self.camera.read_frame()
-            if not ret:
-                continue
+        ret, frame = self.camera.read_frame()
+        if not ret:
+            return None
 
-            rgb_frame, bgr_frame = self.preprocessor.process(frame)
-            results = self.hand_tracker.detect(rgb_frame)
-            output_frame = self.display.draw_landmarks(bgr_frame, results)
+        rgb_frame, bgr_frame = self.preprocessor.process(frame)
+        results = self.hand_tracker.detect(rgb_frame)
+        output_frame = self.display.draw_landmarks(bgr_frame, results)
 
-            if results.hand_landmarks and self.song:
-                hand_landmarks = results.hand_landmarks[0]
-                actual_fingers = self.mapper.get_finger_frets(hand_landmarks, output_frame.shape)
+        if results.hand_landmarks and self.song:
+            hand_landmarks = results.hand_landmarks[0]
+            actual_fingers = self.mapper.get_finger_frets(hand_landmarks, output_frame.shape)
 
-                for finger, pos in actual_fingers.items():
-                    if pos is None:
-                        continue
-                    fret, string = pos
-                    idx = self.mapper.FINGER_INDICES[finger]
-                    lm = hand_landmarks[idx]
-                    h, w, _ = output_frame.shape
-                    x, y = int(lm.x * w), int(lm.y * h)
+            for finger, pos in actual_fingers.items():
+                if pos is None:
+                    continue
+                fret, string = pos
+                idx = self.mapper.FINGER_INDICES[finger]
+                lm = hand_landmarks[idx]
+                h, w, _ = output_frame.shape
+                x, y = int(lm.x * w), int(lm.y * h)
 
-                    expected_fret = self.current_target.get(string, 0)
-                    color = (0, 255, 0) if expected_fret == fret else (0, 0, 255)
-                    cv2.circle(output_frame, (x, y), 10, color, -1)
+                expected_fret = self.current_target.get(string, 0)
+                color = (0, 255, 0) if expected_fret == fret else (0, 0, 255)
+                cv2.circle(output_frame, (x, y), 10, color, -1)
 
-            yield cv2.cvtColor(output_frame, cv2.COLOR_BGR2RGB)
+        return cv2.cvtColor(output_frame, cv2.COLOR_BGR2RGB)
 
 def create_ui():
     app = iGuitarWebUI()
@@ -99,11 +97,12 @@ def create_ui():
                 song_status = gr.Textbox(label="歌曲状态", interactive=False)
 
             with gr.Column():
-                video = gr.Image(label="摄像头画面", streaming=True, sources=None)
+                video = gr.Image(label="摄像头画面")
 
         init_btn.click(app.initialize, outputs=[status])
         load_btn.click(app.load_song, inputs=[song_dropdown], outputs=[song_status])
-        demo.load(app.video_stream, outputs=[video])
+
+        demo.load(lambda: None, None, video, every=0.1).then(app.get_frame, outputs=[video])
 
     return demo
 
