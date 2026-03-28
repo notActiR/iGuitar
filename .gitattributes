@@ -1,0 +1,4 @@
+*.py linguist-detectable=true
+*.cmd linguist-vendored=true
+*.pyc linguist-generated=true
+__pycache__/ linguist-generated=true
