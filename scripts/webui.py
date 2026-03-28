@@ -102,7 +102,7 @@ def create_ui():
         init_btn.click(app.initialize, outputs=[status])
         load_btn.click(app.load_song, inputs=[song_dropdown], outputs=[song_status])
 
-        demo.load(lambda: None, None, video, every=0.1).then(app.get_frame, outputs=[video])
+        video.stream(app.get_frame, inputs=None, outputs=[video], show_progress=False)
 
     return demo
 
