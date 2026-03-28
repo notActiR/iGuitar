@@ -2,7 +2,7 @@
 
 > 基于计算机视觉的吉他教学辅助工具，使用 MediaPipe 实时检测手部动作，帮助初学者纠正指法
 
-![Version](https://img.shields.io/badge/version-0.1-blue)
+![Version](https://img.shields.io/badge/version-0.3-blue)
 ![Python](https://img.shields.io/badge/python-3.8+-green)
 ![MediaPipe](https://img.shields.io/badge/mediapipe-latest-orange)
 
@@ -12,14 +12,15 @@
 
 iGuitar 是一个面向吉他初学者的智能学习辅助系统。通过摄像头实时捕捉用户的手部动作，与标准指法进行对比，并给出即时反馈，帮助学习者快速掌握正确的弹奏姿势。
 
-### 核心功能（v0.1）
+### 核心功能（v0.3）
 
 - ✅ 实时手部关键点检测（21个关键点）
 - ✅ 双手同时追踪
 - ✅ 骨架可视化显示
+- ✅ 指板坐标映射与标定
+- ✅ 和弦识别与反馈
+- ✅ 歌曲练习模式
 - ✅ FPS 性能监控
-- 🚧 动作标准对比（开发中）
-- 🚧 智能反馈系统（计划中）
 
 ---
 
@@ -102,11 +103,11 @@ pip install numpy
 
 4. **下载模型文件**
 
-创建 `models` 目录并下载 MediaPipe 手部检测模型：
+创建 `assets/models` 目录并下载 MediaPipe 手部检测模型：
 
 ```bash
-mkdir models
-cd models
+mkdir -p assets/models
+cd assets/models
 
 # Windows PowerShell
 Invoke-WebRequest -Uri "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task" -OutFile "hand_landmarker.task"
@@ -114,17 +115,27 @@ Invoke-WebRequest -Uri "https://storage.googleapis.com/mediapipe-models/hand_lan
 # Mac/Linux
 curl -o hand_landmarker.task https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task
 
-cd ..
+cd ../..
 ```
 
 或手动下载：[下载链接](https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task)
 
-将文件放到 `iGuitar/models/hand_landmarker.task`
+将文件放到 `iGuitar/assets/models/hand_landmarker.task`
 
-5. **运行程序**
+5. **运行标定**
+
+首次使用需要进行指板标定：
 
 ```bash
-python main.py
+python scripts/calibrate.py
+```
+
+按照屏幕提示，用食指依次触碰四个标定点。
+
+6. **运行主程序**
+
+```bash
+python scripts/main.py
 ```
 
 ---
@@ -133,53 +144,60 @@ python main.py
 
 ```
 iGuitar/
-│
-├── main.py                      # 程序入口
-│
-├── camera/                      # 摄像头模块
-│   └── camera.py                # 摄像头输入控制
-│
-├── vision/                      # 视觉处理模块
-│   ├── __init__.py
-│   ├── preprocess.py            # 视频预处理
-│   └── hand_tracker.py          # 手部追踪（MediaPipe）
-│
-├── feature/                     # 特征提取模块（待开发）
-│   └── extractor.py
-│
-├── evaluation/                  # 动作评估模块（待开发）
-│   └── chord_evaluator.py
-│
-├── feedback/                    # 反馈生成模块（待开发）
-│   └── feedback_generator.py
-│
-├── ui/                          # 用户界面模块
-│   └── display.py               # 画面显示和标注
-│
-├── data/                        # 数据存储
-│   └── chords/                  # 标准和弦数据
-│       └── C.json               # C大调和弦（示例）
-│
-├── models/                      # 模型文件
-│   └── hand_landmarker.task     # MediaPipe 手部模型
-│
-├── utils/                       # 工具函数
-│   └── __init__.py
-│
-├── requirements.txt             # 依赖列表
-└── README.md                    # 项目文档
+├── src/                         # 源代码
+│   ├── core/                   # 核心功能模块
+│   │   ├── camera.py           # 摄像头输入
+│   │   ├── hand_tracker.py     # 手部追踪
+│   │   └── preprocessor.py     # 视频预处理
+│   ├── mapping/                # 坐标映射
+│   │   ├── calibrator.py       # 标定器
+│   │   └── fretboard_mapper.py # 指板映射
+│   ├── data/                   # 数据模块
+│   │   ├── chord_db.py         # 和弦数据库
+│   │   └── song.py             # 歌曲管理
+│   └── ui/                     # UI显示
+│       └── display.py          # 显示模块
+├── scripts/                    # 可执行脚本
+│   ├── main.py                # 主程序
+│   └── calibrate.py           # 标定脚本
+├── assets/                     # 资源文件
+│   ├── models/                # ML模型
+│   │   └── hand_landmarker.task
+│   └── songs/                 # 歌曲文件
+│       └── twinkle.json
+├── requirements.txt            # 依赖列表
+└── README.md                   # 项目文档
 ```
 
 ---
 
 ## 🎮 使用说明
 
-### 基本操作
+### 标定流程
+
+1. 运行 `python scripts/calibrate.py`
+2. 用食指依次触碰四个标定点：
+   - 第1弦第1品
+   - 第6弦第1品
+   - 第1弦第12品
+   - 第6弦第12品
+3. 每个点按空格键记录
+4. 完成后生成 `calibration_matrix.npy`
+
+### 主程序操作
 
 1. 启动程序后，摄像头会自动打开
-2. 将双手放在摄像头前（距离 30-80cm 最佳）
-3. 系统会实时显示手部骨架和关键点
-4. 按 `Q` 键退出程序
+2. 将左手放在吉他指板上
+3. 系统实时显示指法反馈：
+   - **绿色**：正确按弦
+   - **红色**：按错品位
+   - **橙色**：多余手指
+   - **白色**：未知状态
+4. 按键控制：
+   - `N` - 下一个和弦/音符
+   - `P` - 上一个和弦/音符
+   - `R` - 重置到开头
+   - `Q` - 退出程序
 
 ### 最佳使用环境
 
@@ -193,7 +211,9 @@ iGuitar/
 - **绿色圆点**：手部关键点（21个）
 - **红色连线**：骨架连接
 - **黄色标签**：左手/右手标识
+- **彩色圆圈**：指尖位置反馈
 - **左上角**：FPS 和检测手数
+- **右上角**：当前歌曲和事件信息
 
 ---
 
@@ -224,7 +244,7 @@ iGuitar/
 
 ### 修改摄像头ID
 
-如果默认摄像头无法使用，修改 `camera/camera.py`：
+如果默认摄像头无法使用，修改 `src/core/camera.py`：
 
 ```python
 camera = Camera(camera_id=1)  # 尝试不同的ID：0, 1, 2
@@ -232,7 +252,7 @@ camera = Camera(camera_id=1)  # 尝试不同的ID：0, 1, 2
 
 ### 调整检测参数
 
-在 `vision/hand_tracker.py` 中：
+在 `src/core/hand_tracker.py` 中：
 
 ```python
 hand_tracker = HandTracker(
@@ -244,7 +264,7 @@ hand_tracker = HandTracker(
 
 ### 性能优化
 
-降低分辨率以提高帧率，修改 `vision/preprocess.py`：
+降低分辨率以提高帧率，修改 `src/core/preprocessor.py`：
 
 ```python
 preprocessor = VideoPreprocessor(
@@ -271,7 +291,7 @@ preprocessor = VideoPreprocessor(
 
 ### Q: 找不到模型文件？
 
-**A:** 确认 `models/hand_landmarker.task` 文件存在且大小约 6MB
+**A:** 确认 `assets/models/hand_landmarker.task` 文件存在且大小约 7.6MB
 
 ### Q: 导入 mediapipe 报错？
 
@@ -281,28 +301,35 @@ preprocessor = VideoPreprocessor(
 
 ## 📅 开发路线图
 
-### v0.1（当前版本）✅
+### v0.1 ✅
 
 - [x] 摄像头输入
 - [x] 手部关键点检测
 - [x] 骨架可视化
 - [x] 基础架构搭建
 
-### v0.2（下一版本）
+### v0.2 ✅
 
-- [ ] 录制标准和弦动作
-- [ ] 保存关键点数据
-- [ ] 简单的动作对比
-- [ ] 基础反馈提示
+- [x] 指板坐标映射
+- [x] 标定系统
+- [x] 和弦数据库
+- [x] 基础反馈提示
 
-### v0.3（计划中）
+### v0.3（当前版本）✅
 
-- [ ] 多和弦支持
+- [x] 歌曲练习模式
+- [x] 实时指法反馈
+- [x] 代码重构优化
+- [x] 模块化架构
+
+### v1.0（计划中）
+
+- [ ] 更多和弦支持
 - [ ] 动作评分系统
-- [ ] 详细反馈文字
-- [ ] 数据统计功能
+- [ ] 练习统计功能
+- [ ] UI界面优化
 
-### v1.0（长期目标）
+### v2.0（长期目标）
 
 - [ ] 机器学习动作识别
 - [ ] 语音反馈
