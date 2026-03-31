@@ -3,27 +3,33 @@ import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 import numpy as np
+from .logger import setup_logger
+from .exceptions import ModelError
 
+logger = setup_logger(__name__)
 
 class HandTracker:
     def __init__(self, model_path='assets/models/hand_landmarker.task',
                  max_hands=2,
                  detection_confidence=0.5,
                  tracking_confidence=0.5):
-        base_options = python.BaseOptions(model_asset_path=model_path)
-        options = vision.HandLandmarkerOptions(
-            base_options=base_options,
-            running_mode=vision.RunningMode.VIDEO,
-            num_hands=max_hands,
-            min_hand_detection_confidence=detection_confidence,
-            min_hand_presence_confidence=tracking_confidence,
-            min_tracking_confidence=tracking_confidence
-        )
+        try:
+            base_options = python.BaseOptions(model_asset_path=model_path)
+            options = vision.HandLandmarkerOptions(
+                base_options=base_options,
+                running_mode=vision.RunningMode.VIDEO,
+                num_hands=max_hands,
+                min_hand_detection_confidence=detection_confidence,
+                min_hand_presence_confidence=tracking_confidence,
+                min_tracking_confidence=tracking_confidence
+            )
 
-        self.detector = vision.HandLandmarker.create_from_options(options)
-        self.frame_timestamp_ms = 0
+            self.detector = vision.HandLandmarker.create_from_options(options)
+            self.frame_timestamp_ms = 0
 
-        print("✅ MediaPipe 手部追踪器初始化成功 (新版API)")
+            logger.info("MediaPipe 手部追踪器初始化成功")
+        except Exception as e:
+            raise ModelError(f"模型加载失败: {e}\n请确认模型文件存在: {model_path}")
 
     def detect(self, rgb_frame):
         mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)
@@ -57,4 +63,4 @@ class HandTracker:
 
     def close(self):
         self.detector.close()
-        print("🔒 手部追踪器已关闭")
+        logger.info("手部追踪器已关闭")

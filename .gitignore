@@ -24,6 +24,7 @@ calibration_matrix.npy
 calibration_points.json
 practice_stats.json
 config.json
+logs/
 
 # OS
 .DS_Store

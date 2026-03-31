@@ -1,22 +1,25 @@
 """坐标映射模块"""
 import numpy as np
 import cv2
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+from src.core.logger import setup_logger
+from src.core.exceptions import CalibrationError
+from src.constants import FINGER_TIPS, FRETBOARD
+
+logger = setup_logger(__name__)
 
 class FretboardMapper:
-    FINGER_INDICES = {
-        'thumb': 4,
-        'index': 8,
-        'middle': 12,
-        'ring': 16,
-        'little': 20
-    }
+    FINGER_INDICES = FINGER_TIPS
 
     def __init__(self, matrix_path='calibration_matrix.npy'):
         try:
             self.homography = np.load(matrix_path)
+            logger.info("标定矩阵加载成功")
         except FileNotFoundError:
-            raise FileNotFoundError(
-                f"❌ 未找到标定文件: {matrix_path}\n"
+            raise CalibrationError(
+                f"未找到标定文件: {matrix_path}\n"
                 "请先运行标定程序: python scripts/calibrate.py"
             )
 
@@ -44,7 +47,7 @@ class FretboardMapper:
             fret, string = self.pixel_to_fretboard(x, y)
             fret_round = int(round(fret))
             string_round = int(round(string))
-            if 0 <= fret_round <= 24 and 1 <= string_round <= 6:
+            if 0 <= fret_round <= FRETBOARD['max_frets'] and 1 <= string_round <= FRETBOARD['strings']:
                 result[name] = (fret_round, string_round)
             else:
                 result[name] = None
