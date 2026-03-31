@@ -2,7 +2,7 @@
 
 > 基于计算机视觉的吉他教学辅助工具，使用 MediaPipe 实时检测手部动作，帮助初学者纠正指法
 
-![Version](https://img.shields.io/badge/version-0.3-blue)
+![Version](https://img.shields.io/badge/version-0.5-blue)
 ![Python](https://img.shields.io/badge/python-3.8+-green)
 ![MediaPipe](https://img.shields.io/badge/mediapipe-latest-orange)
 
@@ -12,7 +12,7 @@
 
 iGuitar 是一个面向吉他初学者的智能学习辅助系统。通过摄像头实时捕捉用户的手部动作，与标准指法进行对比，并给出即时反馈，帮助学习者快速掌握正确的弹奏姿势。
 
-### 核心功能（v0.3）
+### 核心功能（v0.5）
 
 - ✅ 实时手部关键点检测（21个关键点）
 - ✅ 双手同时追踪
@@ -21,40 +21,11 @@ iGuitar 是一个面向吉他初学者的智能学习辅助系统。通过摄像
 - ✅ 和弦识别与反馈
 - ✅ 歌曲练习模式
 - ✅ FPS 性能监控
+- ✅ **Web UI 界面**（基于 Gradio）
+- ✅ 练习统计与数据分析
+- ✅ 多首歌曲支持
 
----
 
-## 🏗️ 系统架构
-
-```
-┌──────────────┐
-│   摄像头输入   │  Camera Module
-└──────┬───────┘
-       ↓
-┌──────────────┐
-│  视频预处理   │  Preprocessing (翻转/缩放/色彩转换)
-└──────┬───────┘
-       ↓
-┌──────────────┐
-│  手部识别    │  MediaPipe Hand Tracking
-└──────┬───────┘
-       ↓
-┌──────────────┐
-│  特征提取    │  Feature Extraction
-└──────┬───────┘
-       ↓
-┌──────────────┐
-│  动作评估    │  Evaluation (规则/ML)
-└──────┬───────┘
-       ↓
-┌──────────────┐
-│  反馈生成    │  Feedback Generator
-└──────┬───────┘
-       ↓
-┌──────────────┐
-│   用户界面   │  UI Display
-└──────────────┘
-```
 
 ---
 
@@ -99,6 +70,7 @@ pip install -r requirements.txt
 pip install opencv-python
 pip install mediapipe
 pip install numpy
+pip install gradio
 ```
 
 4. **下载模型文件**
@@ -134,6 +106,16 @@ python scripts/calibrate.py
 
 6. **运行主程序**
 
+**方式一：Web UI（推荐）**
+
+```bash
+python scripts/webui.py
+```
+
+启动后在浏览器打开显示的地址（通常是 `http://localhost:7860`）
+
+**方式二：传统窗口模式**
+
 ```bash
 python scripts/main.py
 ```
@@ -158,13 +140,17 @@ iGuitar/
 │   └── ui/                     # UI显示
 │       └── display.py          # 显示模块
 ├── scripts/                    # 可执行脚本
-│   ├── main.py                # 主程序
+│   ├── main.py                # 主程序（窗口模式）
+│   ├── webui.py               # Web UI 界面
 │   └── calibrate.py           # 标定脚本
 ├── assets/                     # 资源文件
 │   ├── models/                # ML模型
 │   │   └── hand_landmarker.task
 │   └── songs/                 # 歌曲文件
-│       └── twinkle.json
+│       ├── twinkle.json
+│       ├── happy_birthday.json
+│       ├── ordinary_road.json
+│       └── simple_practice.json
 ├── requirements.txt            # 依赖列表
 └── README.md                   # 项目文档
 ```
@@ -184,7 +170,19 @@ iGuitar/
 3. 每个点按空格键记录
 4. 完成后生成 `calibration_matrix.npy`
 
-### 主程序操作
+### Web UI 使用（推荐）
+
+1. 运行 `python scripts/webui.py`
+2. 在浏览器打开显示的地址
+3. 选择歌曲并点击"开始练习"
+4. 实时查看视频反馈和练习统计
+5. 使用界面按钮控制：
+   - **下一个** - 下一个和弦/音符
+   - **上一个** - 上一个和弦/音符
+   - **重置** - 回到开头
+   - **停止** - 停止练习
+
+### 传统窗口模式操作
 
 1. 启动程序后，摄像头会自动打开
 2. 将左手放在吉他指板上
@@ -315,19 +313,25 @@ preprocessor = VideoPreprocessor(
 - [x] 和弦数据库
 - [x] 基础反馈提示
 
-### v0.3（当前版本）✅
+### v0.3 ✅
 
 - [x] 歌曲练习模式
 - [x] 实时指法反馈
 - [x] 代码重构优化
 - [x] 模块化架构
 
+### v0.5（当前版本）✅
+
+- [x] Web UI 界面（Gradio）
+- [x] 练习统计功能
+- [x] 多首歌曲支持
+- [x] 界面优化
+
 ### v1.0（计划中）
 
 - [ ] 更多和弦支持
 - [ ] 动作评分系统
-- [ ] 练习统计功能
-- [ ] UI界面优化
+- [ ] 进度追踪系统
 
 ### v2.0（长期目标）
 

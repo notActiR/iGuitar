@@ -1,0 +1,22 @@
+{
+  "camera": {
+    "id": 0,
+    "width": 1280,
+    "height": 720
+  },
+  "hand_tracker": {
+    "max_hands": 2,
+    "detection_confidence": 0.5,
+    "tracking_confidence": 0.5
+  },
+  "fretboard": {
+    "strings": 6,
+    "frets": 12,
+    "distance_threshold": 30
+  },
+  "display": {
+    "show_fps": true,
+    "show_skeleton": true,
+    "flip_horizontal": true
+  }
+}
