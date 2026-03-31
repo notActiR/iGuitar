@@ -12,7 +12,13 @@ class FretboardMapper:
     }
 
     def __init__(self, matrix_path='calibration_matrix.npy'):
-        self.homography = np.load(matrix_path)
+        try:
+            self.homography = np.load(matrix_path)
+        except FileNotFoundError:
+            raise FileNotFoundError(
+                f"❌ 未找到标定文件: {matrix_path}\n"
+                "请先运行标定程序: python scripts/calibrate.py"
+            )
 
     def pixel_to_fretboard(self, x, y):
         p = np.array([[[x, y]]], dtype=np.float32)
