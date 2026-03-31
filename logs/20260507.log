@@ -1,0 +1,65 @@
+15:43:39 - src.core.camera - INFO - 摄像头初始化成功 (ID=0)
+15:43:39 - src.core.hand_tracker - INFO - MediaPipe 手部追踪器初始化成功
+15:47:17 - src.core.camera - INFO - 摄像头初始化成功 (ID=0)
+15:47:17 - src.core.hand_tracker - INFO - MediaPipe 手部追踪器初始化成功
+15:48:06 - src.core.camera - INFO - 摄像头初始化成功 (ID=0)
+15:48:06 - src.core.hand_tracker - INFO - MediaPipe 手部追踪器初始化成功
+15:48:32 - src.core.camera - INFO - 摄像头已关闭
+15:48:32 - src.core.hand_tracker - INFO - 手部追踪器已关闭
+15:48:52 - src.core.camera - INFO - 摄像头初始化成功 (ID=0)
+15:48:52 - src.core.hand_tracker - INFO - MediaPipe 手部追踪器初始化成功
+15:48:52 - src.mapping.fretboard_mapper - INFO - 标定矩阵加载成功
+15:50:27 - src.core.camera - INFO - 摄像头初始化成功 (ID=0)
+15:50:27 - src.core.hand_tracker - INFO - MediaPipe 手部追踪器初始化成功
+15:50:47 - src.core.camera - INFO - 摄像头初始化成功 (ID=0)
+15:50:47 - src.core.hand_tracker - INFO - MediaPipe 手部追踪器初始化成功
+15:50:47 - src.mapping.fretboard_mapper - INFO - 标定矩阵加载成功
+15:51:16 - src.core.camera - INFO - 摄像头已关闭
+15:51:16 - src.core.hand_tracker - INFO - 手部追踪器已关闭
+15:52:28 - src.core.camera - INFO - 摄像头初始化成功 (ID=0)
+15:52:28 - src.core.hand_tracker - INFO - MediaPipe 手部追踪器初始化成功
+15:53:37 - src.core.camera - INFO - 摄像头初始化成功 (ID=0)
+15:53:37 - src.core.hand_tracker - INFO - MediaPipe 手部追踪器初始化成功
+15:53:37 - src.mapping.fretboard_mapper - INFO - 标定矩阵加载成功
+15:53:46 - src.core.camera - INFO - 摄像头已关闭
+15:53:46 - src.core.hand_tracker - INFO - 手部追踪器已关闭
+15:54:15 - src.core.camera - INFO - 摄像头初始化成功 (ID=0)
+15:54:15 - src.core.hand_tracker - INFO - MediaPipe 手部追踪器初始化成功
+15:55:01 - src.core.camera - INFO - 摄像头初始化成功 (ID=0)
+15:55:01 - src.core.hand_tracker - INFO - MediaPipe 手部追踪器初始化成功
+15:55:01 - src.mapping.fretboard_mapper - INFO - 标定矩阵加载成功
+15:57:33 - src.core.camera - INFO - 摄像头已关闭
+15:57:33 - src.core.hand_tracker - INFO - 手部追踪器已关闭
+16:03:44 - src.core.camera - INFO - 摄像头初始化成功 (ID=0)
+16:03:44 - src.core.hand_tracker - INFO - MediaPipe 手部追踪器初始化成功
+16:03:44 - src.mapping.fretboard_mapper - INFO - 标定矩阵加载成功
+16:04:06 - src.core.camera - INFO - 摄像头已关闭
+16:04:06 - src.core.hand_tracker - INFO - 手部追踪器已关闭
+16:06:38 - src.core.camera - INFO - 摄像头初始化成功 (ID=0)
+16:06:38 - src.core.hand_tracker - INFO - MediaPipe 手部追踪器初始化成功
+16:07:38 - src.core.camera - INFO - 摄像头初始化成功 (ID=0)
+16:07:38 - src.core.hand_tracker - INFO - MediaPipe 手部追踪器初始化成功
+16:07:50 - src.core.camera - INFO - 摄像头已关闭
+16:07:50 - src.core.hand_tracker - INFO - 手部追踪器已关闭
+16:07:57 - src.core.camera - INFO - 摄像头初始化成功 (ID=0)
+16:07:57 - src.core.hand_tracker - INFO - MediaPipe 手部追踪器初始化成功
+16:07:57 - src.mapping.fretboard_mapper - INFO - 标定矩阵加载成功
+16:08:50 - src.core.camera - INFO - 摄像头已关闭
+16:08:50 - src.core.hand_tracker - INFO - 手部追踪器已关闭
+16:09:14 - src.core.camera - INFO - 摄像头初始化成功 (ID=0)
+16:09:14 - src.core.hand_tracker - INFO - MediaPipe 手部追踪器初始化成功
+16:09:14 - src.mapping.fretboard_mapper - INFO - 标定矩阵加载成功
+16:09:41 - src.core.camera - INFO - 摄像头已关闭
+16:09:41 - src.core.hand_tracker - INFO - 手部追踪器已关闭
+16:10:23 - src.core.camera - INFO - 摄像头初始化成功 (ID=0)
+16:10:23 - src.core.hand_tracker - INFO - MediaPipe 手部追踪器初始化成功
+16:10:23 - src.mapping.fretboard_mapper - INFO - 标定矩阵加载成功
+16:27:23 - src.core.camera - INFO - 摄像头初始化成功 (ID=0)
+16:27:24 - src.core.camera - INFO - 摄像头已关闭
+16:27:30 - src.core.camera - INFO - 摄像头初始化成功 (ID=0)
+16:27:31 - src.core.camera - INFO - 摄像头已关闭
+16:29:08 - src.core.camera - INFO - 摄像头初始化成功 (ID=0)
+16:29:25 - src.core.camera - INFO - 摄像头已关闭
+16:40:02 - src.core.camera - INFO - 摄像头初始化成功 (ID=0)
+16:40:52 - src.core.camera - INFO - 摄像头已关闭
+16:45:21 - src.core.camera - INFO - 摄像头初始化成功 (ID=0)

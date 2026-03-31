@@ -1,30 +1,9 @@
-# Python
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
+*.pyc
+*.pyo
+.env
 *.egg-info/
 dist/
 build/
-
-# Virtual Environment
-venv/
-.venv/
-env/
-
-# IDE
-.vscode/
 .idea/
-*.swp
-*.swo
-
-# Project specific
-calibration_matrix.npy
-calibration_points.json
-practice_stats.json
-config.json
-
-# OS
-.DS_Store
-Thumbs.db
+.vscode/

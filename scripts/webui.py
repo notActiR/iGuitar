@@ -1,9 +1,8 @@
-"""WebUI 界面 - 基于 Gradio (增强版，优化布局)"""
+"""WebUI 界面 - 基于 Gradio (性能优化版)"""
 import gradio as gr
 import cv2
 import sys
 import os
-import json
 import numpy as np
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -47,8 +46,8 @@ def draw_fretboard_diagram(frame, target, position='top-right', size=(200, 300),
         string_idx = 6 - string
         y = int(y_start + 20 + string_idx * string_spacing + string_spacing / 2)
         x = int(x_start + 20 + (fret - 1) * fret_spacing + fret_spacing / 2)
-        cv2.circle(frame, (x, y), 6, (0, 255, 0), -1)
-        cv2.circle(frame, (x, y), 8, (255, 255, 255), 1)
+        cv2.circle(frame, (x, y), 5, (0, 255, 0), -1)   # 半径减小
+        cv2.circle(frame, (x, y), 7, (255, 255, 255), 1)
 
     for i in range(6):
         y = int(y_start + 20 + i * string_spacing + string_spacing / 2)
@@ -82,8 +81,8 @@ class iGuitarWebUI:
         self.current_target = None
         self.stats = PracticeStats()
         self.initialized = False
-        self.show_target = True      # 显示半透明目标点
-        self.show_diagram = True     # 显示指板图
+        self.show_target = True
+        self.show_diagram = True
 
     def initialize(self):
         try:
@@ -91,17 +90,17 @@ class iGuitarWebUI:
                 return "⚠️ 请先运行标定程序", ""
 
             self.camera = Camera(camera_id=0)
-            self.hand_tracker = HandTracker(max_hands=2)
-            self.preprocessor = VideoPreprocessor(flip=True, target_width=640)
+            # 降低分辨率提升性能
+            self.hand_tracker = HandTracker(max_hands=2, use_enhancer=False)  # 关闭增强器减轻负载
+            self.preprocessor = VideoPreprocessor(flip=True, target_width=480)
             self.display = Display()
-            self.mapper = FretboardMapper('calibration_matrix.npy')
+            self.mapper = FretboardMapper('calibration_matrix.npy', use_smoothing=False)  # 关闭平滑
             self.initialized = True
             return "✅ 初始化成功", "系统已就绪"
         except Exception as e:
             return f"❌ 初始化失败: {e}", ""
 
     def refresh_songs(self):
-        """扫描 assets/songs/ 目录，返回下拉选项"""
         songs_dir = 'assets/songs'
         if not os.path.exists(songs_dir):
             return []
@@ -156,24 +155,21 @@ class iGuitarWebUI:
         results = self.hand_tracker.detect(rgb_frame)
         output_frame = self.display.draw_landmarks(bgr_frame, results)
 
-        stats_text = f"FPS: 30 | 手部: {len(results.hand_landmarks) if results.hand_landmarks else 0}"
+        stats_text = f"手部: {len(results.hand_landmarks) if results.hand_landmarks else 0}"
         feedback_text = ""
 
         if results.hand_landmarks and self.song:
             hand_landmarks = results.hand_landmarks[0]
             actual_fingers = self.mapper.get_finger_frets(hand_landmarks, output_frame.shape)
 
-            # 获取指尖像素坐标
             fingertip_pixels = {}
             finger_indices = {'thumb':4, 'index':8, 'middle':12, 'ring':16, 'little':20}
             for finger, idx in finger_indices.items():
                 lm = hand_landmarks[idx]
                 h, w, _ = output_frame.shape
-                x = int(lm.x * w)
-                y = int(lm.y * h)
+                x, y = int(lm.x * w), int(lm.y * h)
                 fingertip_pixels[finger] = (x, y)
 
-            # 比对
             chord_result = {string: 'unknown' for string in range(1, 7)}
             for finger, pos in actual_fingers.items():
                 if pos is None:
@@ -183,10 +179,7 @@ class iGuitarWebUI:
                 if expected_fret == fret:
                     chord_result[string] = 'correct'
                 else:
-                    if expected_fret != 0:
-                        chord_result[string] = 'wrong'
-                    else:
-                        chord_result[string] = 'extra'
+                    chord_result[string] = 'wrong' if expected_fret != 0 else 'extra'
 
             for string, expected_fret in self.current_target.items():
                 if expected_fret != 0:
@@ -194,14 +187,11 @@ class iGuitarWebUI:
                     if not found:
                         chord_result[string] = 'missing'
 
-            # 绘制目标点（半透明）
             if self.show_target:
                 output_frame = draw_target_points(output_frame, self.mapper, self.current_target)
 
-            # 绘制缺失标记
             output_frame = draw_missing_markers(output_frame, self.mapper, self.current_target, actual_fingers)
 
-            # 绘制指尖圆点 + 连线
             for finger, pos in actual_fingers.items():
                 if pos is None:
                     continue
@@ -218,25 +208,23 @@ class iGuitarWebUI:
                     color = (255, 255, 255)
 
                 x, y = fingertip_pixels[finger]
-                cv2.circle(output_frame, (x, y), 10, color, -1)
-                cv2.circle(output_frame, (x, y), 10, (255, 255, 255), 2)
-                cv2.putText(output_frame, f"{fret},{string}", (x+15, y-10),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
+                cv2.circle(output_frame, (x, y), 6, color, -1)   # 半径缩小
+                cv2.circle(output_frame, (x, y), 6, (255, 255, 255), 2)
+                cv2.putText(output_frame, f"{fret},{string}", (x+12, y-8),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255,255,255), 1)
 
                 if expected_fret != 0:
                     target_x, target_y = self.mapper.fretboard_to_pixel(expected_fret, string)
-                    cv2.line(output_frame, (x, y), (target_x, target_y), (255, 255, 255), 2)
+                    cv2.line(output_frame, (x, y), (target_x, target_y), (255, 255, 200), 1)  # 连线变细
 
-            # 生成评价文字
             feedback_text = get_feedback_text(chord_result)
 
-            # 在画面上方绘制评价文字
-            text_size = cv2.getTextSize(feedback_text, cv2.FONT_HERSHEY_SIMPLEX, 0.8, 2)[0]
+            # 评价文字位置和大小调整
+            text_size = cv2.getTextSize(feedback_text, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)[0]
             text_x = (output_frame.shape[1] - text_size[0]) // 2
             cv2.putText(output_frame, feedback_text, (text_x, 80),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
 
-            # 显示当前事件信息
             ev_info = f"{self.song.current_index+1}/{len(self.song.events)}"
             if self.song.type == 'chord':
                 ev_name = self.song.events[self.song.current_index]['chord']
@@ -244,17 +232,15 @@ class iGuitarWebUI:
                 ev = self.song.events[self.song.current_index]
                 ev_name = f"String {ev['string']} Fret {ev['fret']}"
             cv2.putText(output_frame, f"{self.song.title} - {ev_info}",
-                        (output_frame.shape[1] - 400, 30),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
+                        (output_frame.shape[1] - 350, 30),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
             cv2.putText(output_frame, f"Now: {ev_name}",
-                        (output_frame.shape[1] - 400, 60),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
+                        (output_frame.shape[1] - 350, 55),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
 
-            # 绘制指板图（如果开启）
             if self.show_diagram:
                 output_frame = draw_fretboard_diagram(output_frame, self.current_target, alpha=0.5)
 
-            # 统计正确率
             total = sum(1 for s, f in self.current_target.items() if f != 0)
             correct = sum(1 for s, status in chord_result.items() if status == 'correct')
             if total > 0:
@@ -266,10 +252,9 @@ class iGuitarWebUI:
             else:
                 feedback_text = "未检测到手"
 
-        # 添加基础信息
-        output_frame = self.display.add_info(output_frame, 30, len(results.hand_landmarks) if results.hand_landmarks else 0)
+        # 添加基础信息（仅显示手数和 FPS，FPS 可估算）
+        output_frame = self.display.add_info(output_frame, 0, len(results.hand_landmarks) if results.hand_landmarks else 0)
 
-        # 转换为 RGB
         output_frame_rgb = cv2.cvtColor(output_frame, cv2.COLOR_BGR2RGB)
         return output_frame_rgb, stats_text, feedback_text
 
@@ -282,14 +267,11 @@ def create_ui():
 
         with gr.Row():
             with gr.Column(scale=2):
-                # 视频区域
-                video = gr.Image(label="摄像头画面", height=540)
-                # 关键反馈放在视频下方
+                video = gr.Image(label="摄像头画面", height=480)
                 with gr.Row():
                     stats = gr.Textbox(label="实时统计", interactive=False, scale=1)
                     feedback = gr.Textbox(label="错误反馈", interactive=False, scale=1)
             with gr.Column(scale=1):
-                # 左侧控制面板，使用折叠面板精简
                 with gr.Accordion("系统控制", open=True):
                     init_btn = gr.Button("🚀 初始化系统", variant="primary")
                     status = gr.Textbox(label="状态", interactive=False)
@@ -298,11 +280,7 @@ def create_ui():
                 with gr.Accordion("歌曲选择", open=True):
                     with gr.Row():
                         refresh_btn = gr.Button("🔄 刷新列表", size="sm")
-                        song_dropdown = gr.Dropdown(
-                            choices=[],
-                            label="选择歌曲",
-                            interactive=True
-                        )
+                        song_dropdown = gr.Dropdown(choices=[], label="选择歌曲", interactive=True)
                     load_btn = gr.Button("📂 加载歌曲", variant="secondary")
                     song_status = gr.Textbox(label="歌曲状态", interactive=False)
 
@@ -319,22 +297,19 @@ def create_ui():
                         next_btn = gr.Button("➡️ 下一个")
                     chord_info = gr.Textbox(label="当前事件", interactive=False)
 
-        # 初始化回调
+        # 回调
         init_btn.click(app.initialize, outputs=[status, info])
         refresh_btn.click(app.refresh_songs, outputs=[song_dropdown])
         load_btn.click(app.load_song, inputs=[song_dropdown], outputs=[song_status, chord_info])
-
-        # 控制按钮回调
         next_btn.click(app.next_chord, outputs=[chord_info])
         prev_btn.click(app.prev_chord, outputs=[chord_info])
         target_btn.click(app.toggle_target, outputs=[target_status])
         diagram_btn.click(app.toggle_diagram, outputs=[diagram_status])
 
-        # 定时更新画面
-        timer = gr.Timer(0.03)
+        # 定时器间隔改为 0.06 秒（约 16-17 FPS）
+        timer = gr.Timer(0.06)
         timer.tick(app.get_frame, outputs=[video, stats, feedback])
 
-        # 初始刷新歌曲列表
         demo.load(fn=app.refresh_songs, outputs=[song_dropdown])
 
     return demo
